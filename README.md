@@ -1,7 +1,4 @@
-# ds210
-Baseline repository for ds210 Capstone project 
-
-## Environment Setup
+## Tool setup
 
 ### tl:dr
 
@@ -32,30 +29,47 @@ nstall minikube [Docs](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2F
 
 `FASTApi` will be used as the basis for API development. Please refer to the `main.py` file provided as a baseline.
 
+## Setting up your working directory
+
+```
+cd ~
+mkdir ds210
+cd ds210
+git clone git@github.com:sleighton2022/ds210.git
+```
+
 ## Creating your environment with Poetry
 
 Once you have installed `poetry`, you can use the following command from within your `ds210` folder to create a boilerplate project structure.
 
 ```{bash}
-poetry new lab1 --name src
+poetry new lab3 --name src
 ```
 
 Poetry will create the following folder structure; your repository should look like the following:
 
 ```text
-.
-└── ds210
-  ├── ds210
-  │  ├── README.md
-  │  ├── poetry.lock
-  │  ├── pyproject.toml
-  │  ├── src
-  │  │   └── __init__.py
-  │  └── tests
-  │      └── __init__.py
-  ├── README.md
-  ├── .github/
-  └── .gitignore
+.   ├── Dockerfile
+    ├── README.md
+    ├── model_pipeline.pkl
+    ├── poetry.lock
+    ├── pyproject.toml
+    ├── infra
+    │   ├── deployment-pythonapi.yaml
+    │   ├── deployment-redis.yaml
+    │   ├── service-prediction.yaml
+    │   └── service-redis.yaml
+    ├── src
+    │   ├── __init__.py
+    │   ├── housing_predict.py
+    │   └── main.py
+    ├── tests
+    │   ├── __init__.py
+    │   ├── conftest.py
+    │   └── test_src.py
+    └── trainer
+        ├── predict.py
+        └── train.py
 ```
 
 **Do not delete the `.github/` directory,
@@ -104,10 +118,9 @@ To run the application in Minikube, first ensure that the Minikube has been inst
 ```
 minikube start
 eval $(minikube docker-env)
-cd ~/lab-3-caching-and-kubernetes-sleighton2022/lab3 # replace with your path to docker file
+cd ~/ds210/ds210 # replace with your path to docker file
 docker build -t lab3 .  
-cd ~/lab-3-caching-and-kubernetes-sleighton2022/lab3/infra # replace with your path to infra directory
-kubectl apply -f namespace.yaml
+cd ~/ds210/dsl210/infra # replace with your path to infra directory
 kubectl apply -f deployment-redis.yaml
 kubectl apply -f service-redis.yaml
 kubectl apply -f deployment-pythonapi.yaml
@@ -130,3 +143,7 @@ To clean up, use the following commands
 minikube stop
 minikube delete
 ```
+
+
+
+
