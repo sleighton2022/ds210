@@ -14,8 +14,7 @@ from fastapi_cache.decorator import cache
 from redis import asyncio
 
 import joblib
-from joblib import load
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 logger = logging.getLogger(__name__)
 model = None
