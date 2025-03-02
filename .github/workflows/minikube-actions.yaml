@@ -48,7 +48,7 @@ jobs:
 
       - name: Test Deployment (Optional)
         run: |
-          kubectkl get all
+          kubectl get all
           #minikube service prediction-service --url # Get the service URL 
           # Add curl commands or other tests to interact with your running application.
           # Example:
