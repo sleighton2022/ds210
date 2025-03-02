@@ -48,7 +48,7 @@ jobs:
 
       # Example: Linting with Ruff (optional, but recommended)
       - name: Lint with Ruff
-        run: poetry run ruff check .
+        run: poetry run ruff check src/ 
 
       # Example: Type checking with mypy (optional)
       # - name: Type check with mypy
