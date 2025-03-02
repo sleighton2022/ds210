@@ -1,0 +1,55 @@
+name: Python Poetry and Pytest CI
+
+on:
+  push:
+    branches:
+      - main  # Or your main/development branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Choose your desired Python version
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Load cached Poetry virtual environment
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root # --no-root is important if you have a library
+
+      - name: Install project (if it's a library, not an application)
+        run: poetry install --no-interaction  # Install WITH the root package (for libraries)
+        # Remove this step if you are building an application, not a library.
+        # If building a library, keep the prior step and add --no-root
+
+      - name: Run tests with pytest
+        run: |
+          poetry run pytest -v # Use -v for verbose output
+        # Add other pytest options as needed (e.g., --cov, --junitxml)
+
+      # Example: Linting with Ruff (optional, but recommended)
+      - name: Lint with Ruff
+        run: poetry run ruff check .
+
+      # Example: Type checking with mypy (optional)
+      # - name: Type check with mypy
+      #   run: poetry run mypy 
