@@ -27,12 +27,12 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t my-app:latest .  # Build the image, tag it.  '.' is the build context (Dockerfile location)
+          docker build -t python-api:latest .  # Build the image, tag it.  '.' is the build context (Dockerfile location)
           docker images # List images, to confirm the image was build locally.
 
       - name: Load image into Minikube
         run: |
-          minikube image load my-app:latest #Load the image to minikube.
+          minikube image load python-api:latest #Load the image to minikube.
 
       - name: Verify Image Loaded (Optional)
         run:  |
