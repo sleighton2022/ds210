@@ -15,14 +15,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Minikube
         uses: medyagh/setup-minikube@latest # Use a community action for Minikube setup
 
       - name: Start Minikube
         run: |
-          minikube start --driver=docker --kubernetes-version=v1.28.0  # Use Docker driver and specify K8s version
+          minikube start --driver=docker --kubernetes-version=v1.35.0  # Use Docker driver and specify K8s version
           minikube status
 
       - name: Build Docker image
