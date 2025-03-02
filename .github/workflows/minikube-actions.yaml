@@ -48,7 +48,7 @@ jobs:
 
       - name: Test Deployment (Optional)
         run: |
-          minikube service my-app-service --url # Get the service URL (replace 'my-app-service' with your service name)
+          minikube service prediction-service --url # Get the service URL 
           # Add curl commands or other tests to interact with your running application.
           # Example:
           # curl $(minikube service my-app-service --url)
