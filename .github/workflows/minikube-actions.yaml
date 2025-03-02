@@ -22,7 +22,7 @@ jobs:
 
       - name: Start Minikube
         run: |
-          minikube start --driver=docker --kubernetes-version=v1.35.0  # Use Docker driver and specify K8s version
+          minikube start --driver=docker --kubernetes-version=v1.32.0  # Use Docker driver and specify K8s version
           minikube status
 
       - name: Build Docker image
