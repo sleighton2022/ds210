@@ -44,12 +44,12 @@ jobs:
           kubectl apply -f infra/deployment-pythonapi.yaml  # Apply your deployment manifest
           kubectl apply -f infra/service-redis.yaml    # Apply your service manifest (if you have one)
           kubectl apply -f infra/service-prediction.yaml
-          kubectl get all
           #kubectl get pods -l app=    # Check the status of your pods (replace 'my-app' with your app's label)
 
       - name: Test Deployment (Optional)
         run: |
-          minikube service prediction-service --url # Get the service URL 
+          kubectkl get all
+          #minikube service prediction-service --url # Get the service URL 
           # Add curl commands or other tests to interact with your running application.
           # Example:
           # curl $(minikube service my-app-service --url)
