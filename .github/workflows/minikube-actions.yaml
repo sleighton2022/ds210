@@ -1,0 +1,56 @@
+name: Build, Push to Minikube, and Deploy
+
+on:
+  workflow_run:
+    workflows: ["Python Poetry and Pytest CI"]  # Trigger after "Build and Test" completes
+    types:
+      - completed
+    branches:
+      - main
+
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Minikube
+        uses: medyagh/setup-minikube@latest # Use a community action for Minikube setup
+
+      - name: Start Minikube
+        run: |
+          minikube start --driver=docker --kubernetes-version=v1.28.0  # Use Docker driver and specify K8s version
+          minikube status
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-app:latest .  # Build the image, tag it.  '.' is the build context (Dockerfile location)
+          docker images # List images, to confirm the image was build locally.
+
+      - name: Load image into Minikube
+        run: |
+          minikube image load my-app:latest #Load the image to minikube.
+
+      - name: Verify Image Loaded (Optional)
+        run:  |
+          minikube ssh 'docker images'  # SSH into Minikube and list images
+
+      - name: Deploy to Minikube (Optional)
+        run: |
+          kubectl apply -f deployment.yaml  # Apply your deployment manifest
+          kubectl apply -f service.yaml    # Apply your service manifest (if you have one)
+          kubectl get pods -l app=my-app    # Check the status of your pods (replace 'my-app' with your app's label)
+
+      - name: Test Deployment (Optional)
+        run: |
+          minikube service my-app-service --url # Get the service URL (replace 'my-app-service' with your service name)
+          # Add curl commands or other tests to interact with your running application.
+          # Example:
+          # curl $(minikube service my-app-service --url)
+
+      - name: Stop minikube (cleanup)
+        if: always()  # important: always run, even if previous steps fail.
+        run: minikube stop
