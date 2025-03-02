@@ -40,8 +40,10 @@ jobs:
 
       - name: Deploy to Minikube (Optional)
         run: |
-          kubectl apply -f deployment.yaml  # Apply your deployment manifest
-          kubectl apply -f service.yaml    # Apply your service manifest (if you have one)
+          kubectl apply -f infra/deployment-redis.yaml
+          kubectl apply -f infra/deployment-pythonapi.yaml  # Apply your deployment manifest
+          kubectl apply -f infra/service-redis.yaml    # Apply your service manifest (if you have one)
+          kubectl apply -f infra/service-prediction.yaml
           kubectl get pods -l app=my-app    # Check the status of your pods (replace 'my-app' with your app's label)
 
       - name: Test Deployment (Optional)
