@@ -1,0 +1,47 @@
+name: Build, Push, and Deploy to GKE
+
+on:
+  workflow_run:
+    workflows: ["Build, Push to Minikube, and Deploy"]  # Trigger after "Build and Test" completes
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # This needs to be set
+  LOCATION: us-central1      # Replace with your Artifact Registry location
+  REPOSITORY: simplofyai      # Replace with your Artifact Registry repository name
+  IMAGE_NAME: python-api          # Replace with your image name
+  CLUSTER_NAME: autopilot-cluster-1  # Replace with your GKE cluster name
+  CLUSTER_ZONE: us-central1  # Replace with your GKE cluster zone
+  DEPLOYMENT_NAME: my-app-deployment # Replace
+  CONTAINER_NAME: my-app-container   # Replace
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.GCP_SA_EMAIL }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: 'google-github-actions/auth@v2'
+      with:
+        workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ env.SERVICE_ACCOUNT }}
+
+
+    - name: Set up GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.CLUSTER_NAME }}
+        location: ${{ env.CLUSTER_ZONE }}
+        project_id: ${{ env.PROJECT_ID }}
+
