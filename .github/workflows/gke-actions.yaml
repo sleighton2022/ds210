@@ -1,47 +1,64 @@
-name: Build, Push, and Deploy to GKE
+name: Build, Push, and Deploy to GKE (with SA Key)
 
 on:
   workflow_run:
-    workflows: ["Build, Push to Minikube, and Deploy"]  # Trigger after "Build and Test" completes
+    workflows: ["Build, Push to Minikube, and Deploy"]  # Trigger after the Minikube workflow completes
     types:
       - completed
     branches:
       - main
+  workflow_dispatch: # Add this for manual triggering
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # This needs to be set
-  LOCATION: us-central1      # Replace with your Artifact Registry location
-  REPOSITORY: simplofyai      # Replace with your Artifact Registry repository name
-  IMAGE_NAME: python-api          # Replace with your image name
-  CLUSTER_NAME: autopilot-cluster-1  # Replace with your GKE cluster name
-  CLUSTER_ZONE: us-central1  # Replace with your GKE cluster zone
-  DEPLOYMENT_NAME: my-app-deployment # Replace
-  CONTAINER_NAME: my-app-container   # Replace
-  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-  SERVICE_ACCOUNT: ${{ secrets.GCP_SA_EMAIL }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  LOCATION: us-central1
+  REPOSITORY: simplofyai
+  IMAGE_NAME: python-api
+  CLUSTER_NAME: autopilot-cluster-1
+  CLUSTER_ZONE: us-central1  # or your cluster's region if it's regional
+  DEPLOYMENT_NAME: my-app-deployment  # Use the correct deployment name
+  CONTAINER_NAME: my-app-container    # Use the correct container name
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
+    # No special permissions needed when using a service account key
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Authenticate to Google Cloud
-      uses: 'google-github-actions/auth@v2'
+    - name: Authenticate to Google Cloud (Service Account Key)
+      uses: google-github-actions/auth@v2
       with:
-        workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ env.SERVICE_ACCOUNT }}
+        credentials_json: ${{ secrets.GKE_SA_KEY }}  # Use the SA key secret
 
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
 
-    - name: Set up GKE credentials
+    - name: Get GKE Credentials
       uses: google-github-actions/get-gke-credentials@v2
       with:
         cluster_name: ${{ env.CLUSTER_NAME }}
         location: ${{ env.CLUSTER_ZONE }}
         project_id: ${{ env.PROJECT_ID }}
 
+    - name: Build Docker image
+      run: |
+        docker build -t "$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$(git rev-parse --short HEAD)" .
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker "$LOCATION-docker.pkg.dev" --quiet
+
+    - name: Push Docker image to Artifact Registry
+      run: docker push "$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$(git rev-parse --short HEAD)"
+
+    - name: Deploy to GKE
+      run: |
+        kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME="$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$(git rev-parse --short HEAD)"
+        kubectl rollout status deployment/$DEPLOYMENT_NAME
+
+    - name: Verify deployment (Example)
+      run: |
+        kubectl get pods -l app=python-api   # Adapt the label selector
+        kubectl get services
