@@ -55,8 +55,10 @@ jobs:
 
     - name: Deploy to GKE
       run: |
-        kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME="$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:$(git rev-parse --short HEAD)"
-        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        kubectl apply -f infra/deployment-redis.yaml
+        kubectl apply -f infra/deployment-pythonapi.yaml  # Apply your deployment manifest
+        kubectl apply -f infra/service-redis.yaml    # Apply your service manifest (if you have one)
+        kubectl apply -f infra/service-prediction.yaml
 
     - name: Verify deployment (Example)
       run: |
