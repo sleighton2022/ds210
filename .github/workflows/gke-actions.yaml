@@ -28,14 +28,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Debug
-      run: |
-           echo "Project ID"
-           echo ${{ env.PROJECT_ID}}
-           echo "SA Key"
-           echo ${{ secrets.GCP_SA_KEY}}
-           echo "Done"
-
     - name: Authenticate to Google Cloud (Service Account Key)
       uses: google-github-actions/auth@v2
       with:
